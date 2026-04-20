@@ -53,7 +53,3 @@ El proyecto está diseñado bajo distintas fases de desarrollo. A continuación 
    *(Si estás usando Windows, ejecuta `mvnw.cmd spring-boot:run`)*
 
 3. **Acceso a la API:** Una vez iniciada, normalmente podrás revisar los endpoints en la interfaz de Swagger UI (revisa la configuración del puerto en caso de dudas, habitualmente interactuando en `http://localhost:8080/swagger-ui.html`).
-
-## Documentación de Planificación
-
-Para revisar el detalle completo del proyecto, los actores, eventos críticos y especificación de *Historias de Usuario*, puedes consultar el documento inicial en [`docs/PLANNING.md`](./docs/PLANNING.md).
