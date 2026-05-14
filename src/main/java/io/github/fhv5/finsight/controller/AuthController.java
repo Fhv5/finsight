@@ -9,12 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping(path = "/auth", version = "1")
 @AllArgsConstructor
 public class AuthController {
     private final AuthService authService;
 
-    @PostMapping("/register")
+    @PostMapping("/signup")
     public ResponseEntity<AuthDTOS.LoginResponse> register(@RequestBody AuthDTOS.RegisterRequest request) {
         return new ResponseEntity<>(authService.register(request), HttpStatus.CREATED);
     }
@@ -26,7 +26,8 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthDTOS.LoginResponse> refreshToken(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
-        return new ResponseEntity<>(authService.refreshToken(authHeader), HttpStatus.OK);
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
+            @RequestBody  AuthDTOS.RefreshRequest request) {
+        return new ResponseEntity<>(authService.rotateTokens(authHeader, request.refreshToken()), HttpStatus.OK);
     }
 }

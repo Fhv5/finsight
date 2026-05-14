@@ -8,11 +8,18 @@ public class AuthDTOS {
             @NotEmpty String password
     ) {}
 
-    public record LoginResponse(String token) {}
+    public record LoginResponse(
+            String accessToken,
+            String refreshToken
+    ) {}
 
     public record RegisterRequest(
             @NotEmpty String email,
             @NotEmpty String password,
             @NotEmpty String confirmPassword
+    ) {}
+
+    public record RefreshRequest(
+            @NotEmpty String refreshToken
     ) {}
 }
