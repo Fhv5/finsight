@@ -1,9 +1,6 @@
 package io.github.fhv5.finsight.config;
 
 import io.github.fhv5.finsight.security.JwtAuthFilter;
-import io.github.fhv5.finsight.security.JwtService;
-import io.github.fhv5.finsight.security.UserDetailsServiceImpl;
-import io.github.fhv5.finsight.service.TokenService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,9 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @AllArgsConstructor
 public class SecurityConfig {
-    private final UserDetailsServiceImpl userDetailsService;
-    private final JwtService jwtService;
-    private final TokenService tokenService;
+    private final JwtAuthFilter jwtAuthFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -36,14 +31,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
-
-    @Bean
-    public JwtAuthFilter jwtAuthFilter() {
-        return new JwtAuthFilter(tokenService, jwtService, userDetailsService);
     }
 
     @Bean

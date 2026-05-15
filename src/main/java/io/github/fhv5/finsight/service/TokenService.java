@@ -50,12 +50,12 @@ public class TokenService {
     public AuthDTOS.LoginResponse refreshTokens(String jti, String refreshToken) {
         Token token = findActiveToken(jti);
 
-        if (token.getRefreshTokenExpiresAt().isBefore(Instant.now())) {
-            throw new IllegalArgumentException("Refresh token expired");
-        }
-
         if (!token.getRefreshToken().equals(refreshToken)) {
             throw new IllegalArgumentException("Invalid refresh token");
+        }
+
+        if (token.getRefreshTokenExpiresAt().isBefore(Instant.now())) {
+            throw new IllegalArgumentException("Refresh token expired");
         }
 
         User user = userRepository.findById(token.getUserId())

@@ -62,7 +62,7 @@ public class AuthService {
     }
 
     public AuthDTOS.LoginResponse rotateTokens(String authHeader, String refreshToken) {
-        String jwt = authHeader.replace("Bearer ", "");
+        String jwt = authHeader.substring(7);
 
         try {
             jwtService.parseClaims(jwt).getId();
