@@ -1,5 +1,6 @@
 package io.github.fhv5.finsight.config;
 
+import io.github.fhv5.finsight.security.AuthEntryPoint;
 import io.github.fhv5.finsight.security.JwtAuthFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @AllArgsConstructor
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
+    private final AuthEntryPoint authEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,6 +33,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authEntryPoint))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

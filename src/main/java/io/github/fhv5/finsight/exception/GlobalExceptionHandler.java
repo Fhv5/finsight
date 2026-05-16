@@ -63,6 +63,13 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(status, "Invalid email or password", request);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleResourceNotFoundException(ResourceNotFoundException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+
+        return buildErrorResponse(status, ex.getMessage(), request);
+    }
+
     private ResponseEntity<ErrorResponseDTO> buildErrorResponse(HttpStatus status, String message, HttpServletRequest request) {
         ErrorResponseDTO errorResponse = new ErrorResponseDTO(
                 status.value(),

@@ -2,7 +2,6 @@ package io.github.fhv5.finsight.security;
 
 import io.github.fhv5.finsight.service.TokenService;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +25,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserDetailsServiceImpl userDetailsService;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/api/v1/auth/");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -33,23 +38,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 
-            try {
-                Claims claims = jwtService.parseClaims(token);
-                String jti = claims.getId();
+            Claims claims = jwtService.parseClaims(token);
+            String jti = claims.getId();
 
-                tokenService.validateAccessToken(jti);
+            tokenService.validateAccessToken(jti);
 
-                String userId = claims.getSubject();
-                UserDetails userDetails = userDetailsService.loadUserById(UUID.fromString(userId));
+            String userId = claims.getSubject();
+            UserDetails userDetails = userDetailsService.loadUserById(UUID.fromString(userId));
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            } catch (JwtException | IllegalArgumentException e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         filterChain.doFilter(request, response);
     }
