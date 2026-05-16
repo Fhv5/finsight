@@ -32,6 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 
-.env
+### SECRET FILES ###
+**.env
+**.pem
 
+### Documentation ###
 /docs/*
