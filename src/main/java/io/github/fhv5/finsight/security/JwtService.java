@@ -1,7 +1,10 @@
 package io.github.fhv5.finsight.security;
 
 import io.github.fhv5.finsight.config.TokenProperties;
+import io.github.fhv5.finsight.exception.UnauthorizedException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -38,5 +41,15 @@ public class JwtService {
                     .build()
                     .parseSignedClaims(accessToken)
                     .getPayload();
+    }
+
+    public Claims parseClaimsEvenIfExpired(String token) {
+        try {
+            return parseClaims(token);
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new UnauthorizedException("Invalid access token structure");
+        }
     }
 }
