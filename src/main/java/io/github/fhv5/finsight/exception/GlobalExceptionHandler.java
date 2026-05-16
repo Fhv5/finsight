@@ -1,8 +1,10 @@
 package io.github.fhv5.finsight.exception;
 
+import io.github.fhv5.finsight.dto.ErrorResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,78 +14,73 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneralException(HttpServletRequest request) {
-        int status = HttpStatus.INTERNAL_SERVER_ERROR.value();
+    public ResponseEntity<ErrorResponseDTO> handleGeneralException(HttpServletRequest request) {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                status,
-                "Internal Server Error",
-                "An unexpected error occurred",
-                request.getRequestURI()
-        );
-
-        return ResponseEntity.status(status).body(errorResponse);
+        return buildErrorResponse(status, "An unexpected error occurred", request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        int status = HttpStatus.BAD_REQUEST.value();
-        List<ErrorResponse.FieldErrorDetail> fieldErrors = ex.getBindingResult()
+    public ResponseEntity<ErrorResponseDTO> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        List<ErrorResponseDTO.FieldErrorDetail> fieldErrors = ex.getBindingResult()
                 .getFieldErrors().stream()
-                .map(err -> new ErrorResponse.FieldErrorDetail(
+                .map(err -> new ErrorResponseDTO.FieldErrorDetail(
                         err.getField(),
                         err.getDefaultMessage()
                 ))
                 .toList();
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                status,
-                "Bad Request",
-                "Validation failed for one or more fields",
-                request.getRequestURI(),
-                fieldErrors
-        );
-
-        return ResponseEntity.status(status).body(errorResponse);
+        return buildErrorResponse(status, "Validation failed for one or more fields", request, fieldErrors);
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ErrorResponse> handleConflictException(ConflictException ex, HttpServletRequest request) {
-        int status = HttpStatus.CONFLICT.value(); // 409
+    public ResponseEntity<ErrorResponseDTO> handleConflictException(ConflictException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT;
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                status,
-                "Conflict",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-
-        return ResponseEntity.status(status).body(errorResponse);
+        return buildErrorResponse(status, ex.getMessage(), request);
     }
 
     @ExceptionHandler(InvalidInputException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidInputException(InvalidInputException ex, HttpServletRequest request) {
-        int status = HttpStatus.BAD_REQUEST.value();
+    public ResponseEntity<ErrorResponseDTO> handleInvalidInputException(InvalidInputException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                status,
-                "Unprocessable Entity",
-                ex.getMessage(),
+        return buildErrorResponse(status, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleUnauthorizedException(UnauthorizedException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+        return buildErrorResponse(status, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponseDTO> handleBadCredentialsException(HttpServletRequest request) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+        return buildErrorResponse(status, "Invalid email or password", request);
+    }
+
+    private ResponseEntity<ErrorResponseDTO> buildErrorResponse(HttpStatus status, String message, HttpServletRequest request) {
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
+                status.value(),
+                status.toString().substring(status.toString().indexOf(" ") + 1),
+                message,
                 request.getRequestURI()
         );
 
         return ResponseEntity.status(status).body(errorResponse);
     }
 
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex, HttpServletRequest request) {
-        int status = HttpStatus.UNAUTHORIZED.value();
-
-        ErrorResponse errorResponse = new ErrorResponse(
-                status,
-                "Unauthorized",
-                ex.getMessage(),
-                request.getRequestURI()
+    private ResponseEntity<ErrorResponseDTO> buildErrorResponse(HttpStatus status, String message, HttpServletRequest request, List<ErrorResponseDTO.FieldErrorDetail> fieldErrors) {
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(
+                status.value(),
+                status.toString(),
+                message,
+                request.getRequestURI(),
+                fieldErrors
         );
 
         return ResponseEntity.status(status).body(errorResponse);
