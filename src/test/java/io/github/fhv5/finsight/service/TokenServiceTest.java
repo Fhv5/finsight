@@ -2,6 +2,8 @@ package io.github.fhv5.finsight.service;
 
 import io.github.fhv5.finsight.config.TokenProperties;
 import io.github.fhv5.finsight.dto.AuthDTOS;
+import io.github.fhv5.finsight.exception.ResourceNotFoundException;
+import io.github.fhv5.finsight.exception.UnauthorizedException;
 import io.github.fhv5.finsight.model.Token;
 import io.github.fhv5.finsight.model.User;
 import io.github.fhv5.finsight.repository.TokenRepository;
@@ -109,7 +111,7 @@ class TokenServiceTest {
 
         when(tokenRepository.findByJti(jti)).thenReturn(Optional.of(revokedToken));
 
-        assertThrows(IllegalArgumentException.class, () -> tokenService.refreshTokens(jti.toString(), "refresh"));
+        assertThrows(UnauthorizedException.class, () -> tokenService.refreshTokens(jti.toString(), "refresh"));
     }
 
     @Test
@@ -121,7 +123,7 @@ class TokenServiceTest {
 
         when(tokenRepository.findByJti(jti)).thenReturn(Optional.of(token));
 
-        assertThrows(IllegalArgumentException.class, () -> tokenService.refreshTokens(jti.toString(), "invalidRefresh"));
+        assertThrows(UnauthorizedException.class, () -> tokenService.refreshTokens(jti.toString(), "invalidRefresh"));
     }
 
     @Test
@@ -134,7 +136,7 @@ class TokenServiceTest {
 
         when(tokenRepository.findByJti(jti)).thenReturn(Optional.of(token));
 
-        assertThrows(IllegalArgumentException.class, () -> tokenService.refreshTokens(jti.toString(), "validRefresh"));
+        assertThrows(UnauthorizedException.class, () -> tokenService.refreshTokens(jti.toString(), "validRefresh"));
     }
 
     @Test
@@ -156,7 +158,7 @@ class TokenServiceTest {
 
         when(tokenRepository.findByJti(jti)).thenReturn(Optional.of(token));
 
-        assertThrows(IllegalArgumentException.class, () -> tokenService.validateAccessToken(jti.toString()));
+        assertThrows(UnauthorizedException.class, () -> tokenService.validateAccessToken(jti.toString()));
     }
 
     @Test
@@ -164,6 +166,6 @@ class TokenServiceTest {
         UUID jti = UUID.randomUUID();
         when(tokenRepository.findByJti(jti)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> tokenService.validateAccessToken(jti.toString()));
+        assertThrows(ResourceNotFoundException.class, () -> tokenService.validateAccessToken(jti.toString()));
     }
 }

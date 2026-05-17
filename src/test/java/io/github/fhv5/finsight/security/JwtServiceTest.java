@@ -1,6 +1,7 @@
 package io.github.fhv5.finsight.security;
 
 import io.github.fhv5.finsight.config.TokenProperties;
+import io.github.fhv5.finsight.exception.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -82,5 +83,42 @@ class JwtServiceTest {
         String token = expiredJwtService.generateToken(jti, userId);
 
         assertThrows(ExpiredJwtException.class, () -> expiredJwtService.parseClaims(token));
+    }
+
+    @Test
+    void parseClaimsEvenIfExpired_ShouldReturnClaims_WhenTokenIsValid() {
+        String jti = UUID.randomUUID().toString();
+        String userId = UUID.randomUUID().toString();
+
+        String token = jwtService.generateToken(jti, userId);
+        Claims claims = jwtService.parseClaimsEvenIfExpired(token);
+
+        assertNotNull(claims);
+        assertEquals(jti, claims.getId());
+        assertEquals(userId, claims.getSubject());
+    }
+
+    @Test
+    void parseClaimsEvenIfExpired_ShouldReturnClaims_WhenTokenIsExpired() {
+        when(tokenProperties.accessTokenExpiration()).thenReturn(Duration.ofMillis(-1000));
+        JwtService expiredJwtService = new JwtService(tokenProperties);
+
+        String jti = UUID.randomUUID().toString();
+        String userId = UUID.randomUUID().toString();
+
+        String token = expiredJwtService.generateToken(jti, userId);
+
+        Claims claims = expiredJwtService.parseClaimsEvenIfExpired(token);
+
+        assertNotNull(claims);
+        assertEquals(jti, claims.getId());
+        assertEquals(userId, claims.getSubject());
+    }
+
+    @Test
+    void parseClaimsEvenIfExpired_ShouldThrowUnauthorizedException_WhenTokenIsInvalid() {
+        String invalidToken = "invalid.token.here";
+
+        assertThrows(UnauthorizedException.class, () -> jwtService.parseClaimsEvenIfExpired(invalidToken));
     }
 }
