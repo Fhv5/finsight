@@ -2,6 +2,8 @@ package io.github.fhv5.finsight.service;
 
 import io.github.fhv5.finsight.config.TokenProperties;
 import io.github.fhv5.finsight.dto.AuthDTOS;
+import io.github.fhv5.finsight.exception.ResourceNotFoundException;
+import io.github.fhv5.finsight.exception.UnauthorizedException;
 import io.github.fhv5.finsight.model.Token;
 import io.github.fhv5.finsight.model.User;
 import io.github.fhv5.finsight.repository.TokenRepository;
@@ -51,15 +53,15 @@ public class TokenService {
         Token token = findActiveToken(jti);
 
         if (!token.getRefreshToken().equals(refreshToken)) {
-            throw new IllegalArgumentException("Invalid refresh token");
+            throw new UnauthorizedException("Invalid refresh token");
         }
 
         if (token.getRefreshTokenExpiresAt().isBefore(Instant.now())) {
-            throw new IllegalArgumentException("Refresh token expired");
+            throw new UnauthorizedException("Refresh token expired");
         }
 
         User user = userRepository.findById(token.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         token.setRevoked(true);
         tokenRepository.save(token);
@@ -73,10 +75,10 @@ public class TokenService {
 
     private Token findActiveToken(String jti) {
         Token token = tokenRepository.findByJti(UUID.fromString(jti))
-                .orElseThrow(() -> new IllegalArgumentException("Token not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Access Token not found. Was it deleted directly from DB?"));
 
         if (token.isRevoked()) {
-            throw new IllegalArgumentException("Token revoked");
+            throw new UnauthorizedException("Token revoked");
         }
 
         return token;
