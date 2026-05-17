@@ -26,12 +26,10 @@ public class AuthService {
 
     public AuthDTOS.LoginResponse register(AuthDTOS.RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            // TODO: Change to custom exception and handle it in a global exception handler
             throw new ConflictException("Email is already registered");
         }
 
         if (!request.password().equals(request.confirmPassword())) {
-            // TODO: custom exception yea yea
             throw new InvalidInputException("Passwords do not match");
         }
 
