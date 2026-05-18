@@ -4,6 +4,7 @@ import io.github.fhv5.finsight.dto.ErrorResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,6 +19,13 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 
         return buildErrorResponse(status, "An unexpected error occurred", request);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponseDTO> handleMalformedJson(HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        return buildErrorResponse(status, "Malformed JSON request", request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -35,8 +43,8 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(status, "Validation failed for one or more fields", request, fieldErrors);
     }
 
-    @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ErrorResponseDTO> handleConflictException(ConflictException ex, HttpServletRequest request) {
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDTO> handleConflictException(ResourceAlreadyExistsException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.CONFLICT;
 
         return buildErrorResponse(status, ex.getMessage(), request);

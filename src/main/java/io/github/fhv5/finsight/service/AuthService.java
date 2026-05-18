@@ -1,7 +1,7 @@
 package io.github.fhv5.finsight.service;
 
 import io.github.fhv5.finsight.dto.AuthDTOS;
-import io.github.fhv5.finsight.exception.ConflictException;
+import io.github.fhv5.finsight.exception.ResourceAlreadyExistsException;
 import io.github.fhv5.finsight.exception.InvalidInputException;
 import io.github.fhv5.finsight.model.User;
 import io.github.fhv5.finsight.repository.UserRepository;
@@ -26,7 +26,7 @@ public class AuthService {
 
     public AuthDTOS.LoginResponse register(AuthDTOS.RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new ConflictException("Email is already registered");
+            throw new ResourceAlreadyExistsException("Email is already registered");
         }
 
         if (!request.password().equals(request.confirmPassword())) {
