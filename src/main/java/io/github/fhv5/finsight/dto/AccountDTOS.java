@@ -26,7 +26,7 @@ public class AccountDTOS {
                 @NotEmpty 
                 @Schema(description = "Name of the account", example = "Main Checking", requiredMode = Schema.RequiredMode.REQUIRED)
                 String name,
-                @NotEmpty 
+                @NotNull
                 @Schema(description = "Description of the account", example = "Everyday expenses", requiredMode = Schema.RequiredMode.REQUIRED)
                 String description,
                 @NotNull 
