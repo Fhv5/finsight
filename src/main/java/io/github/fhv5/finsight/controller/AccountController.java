@@ -47,7 +47,7 @@ public class AccountController {
     @PostMapping
     @Operation(summary = "Create an account", description = "Creates a new account for the currently authenticated user")
     public ResponseEntity<AccountDTOS.Response> createAccount(
-            @Valid @RequestBody AccountDTOS.CreateRequest request,
+            @RequestBody AccountDTOS.CreateRequest request,
             @AuthenticationPrincipal SecurityUser securityUser) {
         return new ResponseEntity<>(
                 accountService.createAccount(request, securityUser.getId()),

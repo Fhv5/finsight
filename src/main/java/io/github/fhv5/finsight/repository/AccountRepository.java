@@ -2,11 +2,13 @@ package io.github.fhv5.finsight.repository;
 
 import io.github.fhv5.finsight.model.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Repository
 public interface AccountRepository extends JpaRepository<Account, UUID> {
     boolean existsByUserIdAndName(UUID userId, String name);
 
