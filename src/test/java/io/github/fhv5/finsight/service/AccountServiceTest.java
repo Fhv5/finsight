@@ -48,14 +48,14 @@ class AccountServiceTest {
 
     @Test
     void getAccountsForCurrentUser_ShouldReturnListOfAccounts() {
-        when(accountRepository.findByUserId(userId)).thenReturn(List.of(mockAccount));
+        when(accountRepository.findAllByUserId(userId)).thenReturn(List.of(mockAccount));
 
         List<AccountDTOS.Response> accounts = accountService.getAccountsForCurrentUser(userId);
 
         assertEquals(1, accounts.size());
-        assertEquals(accountId, accounts.get(0).id());
-        assertEquals("Main Account", accounts.get(0).name());
-        verify(accountRepository).findByUserId(userId);
+        assertEquals(accountId, accounts.getFirst().id());
+        assertEquals("Main Account", accounts.getFirst().name());
+        verify(accountRepository).findAllByUserId(userId);
     }
 
     @Test
