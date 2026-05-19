@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
+@Builder
 @Getter
 @Setter
 @ToString
@@ -30,10 +31,8 @@ public class Account {
     @Column(name = "balance", nullable = false)
     private Long balance;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    @ToString.Exclude
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
     @CreationTimestamp
     private Instant createdAt;
