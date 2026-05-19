@@ -11,7 +11,7 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     boolean existsByUserIdAndName(UUID userId, String name);
 
 
-    List<Account> findByUserId(UUID userId);
+    List<Account> findAllByUserId(UUID userId);
 
     Optional<Account> findByIdAndUserId(UUID id, UUID userId);
 }

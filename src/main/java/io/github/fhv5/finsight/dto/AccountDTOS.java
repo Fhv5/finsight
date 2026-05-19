@@ -37,8 +37,8 @@ public class AccountDTOS {
         @Schema(description = "Request object for updating an existing account")
         public record UpdateRequest(
                 @Schema(description = "New name of the account", example = "Updated Checking")
-                String name,
+                @NotEmpty String name,
                 @Schema(description = "New description of the account", example = "Updated everyday expenses")
-                String description
+                @NotNull String description
         ) {}
 }

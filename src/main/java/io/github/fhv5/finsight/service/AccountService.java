@@ -18,7 +18,7 @@ public class AccountService {
 
     public List<AccountDTOS.Response> getAccountsForCurrentUser(
             UUID userId) {
-        List<Account> accounts = accountRepository.findByUserId(userId);
+        List<Account> accounts = accountRepository.findAllByUserId(userId);
 
         return accounts.stream()
                 .map(account -> AccountDTOS.Response.builder()
