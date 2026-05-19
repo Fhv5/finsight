@@ -1,6 +1,7 @@
 package io.github.fhv5.finsight.service;
 
 import io.github.fhv5.finsight.dto.AccountDTOS;
+import io.github.fhv5.finsight.exception.InvalidInputException;
 import io.github.fhv5.finsight.exception.ResourceAlreadyExistsException;
 import io.github.fhv5.finsight.exception.ResourceNotFoundException;
 import io.github.fhv5.finsight.model.Account;
@@ -78,7 +79,12 @@ public class AccountService {
         Account existingAccount = accountRepository.findByIdAndUserId(accountId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found or does not belong to user"));
 
+        if (request.name() != null && request.name().isBlank()) {
+            throw new InvalidInputException("Account name cannot be empty");
+        }
+
         if (request.name() != null && !request.name().equals(existingAccount.getName())) {
+
             if (accountRepository.existsByUserIdAndName(userId, request.name())) {
                 throw new ResourceAlreadyExistsException("This user has an account with the same name");
             }

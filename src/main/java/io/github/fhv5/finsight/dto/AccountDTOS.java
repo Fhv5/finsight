@@ -1,7 +1,7 @@
 package io.github.fhv5.finsight.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
@@ -23,7 +23,7 @@ public class AccountDTOS {
 
         @Schema(description = "Request object for creating a new account")
         public record CreateRequest(
-                @NotEmpty 
+                @NotBlank
                 @Schema(description = "Name of the account", example = "Main Checking", requiredMode = Schema.RequiredMode.REQUIRED)
                 String name,
                 @NotNull
