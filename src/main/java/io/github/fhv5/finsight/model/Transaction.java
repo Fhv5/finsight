@@ -32,25 +32,17 @@ public class Transaction {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    @ToString.Exclude
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "origin_account_id")
-    @ToString.Exclude
-    private Account originAccount;
+    @Column(name = "origin_account_id")
+    private UUID originAccountId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "destination_account_id")
-    @ToString.Exclude
-    private Account destinationAccount;
+    @Column(name = "destination_account_id")
+    private UUID destinationAccountId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    @ToString.Exclude
-    private Category category;
+    @Column(name = "category_id", nullable = false)
+    private UUID categoryId;
 
     @CreationTimestamp
     private Instant createdAt;
