@@ -36,5 +36,7 @@ build/
 **.env
 **.pem
 
-### Documentation ###
+
+### Other ###
 /docs/*
+/scripts/*
