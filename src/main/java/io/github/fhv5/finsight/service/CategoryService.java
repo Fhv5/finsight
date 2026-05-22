@@ -57,6 +57,7 @@ public class CategoryService {
         Category newCategory = Category.builder()
                 .name(request.name())
                 .type(request.type())
+                .userId(userId)
                 .build();
 
         Category savedCategory = categoryRepository.save(newCategory);
