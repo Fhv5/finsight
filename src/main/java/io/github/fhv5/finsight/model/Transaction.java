@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
+@Builder
 @Getter
 @Setter
 @ToString
@@ -23,6 +24,7 @@ public class Transaction {
     @Column(name = "date_issued", nullable = false)
     private Instant dateIssued;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private TransactionType type;
 
@@ -41,7 +43,7 @@ public class Transaction {
     @Column(name = "destination_account_id")
     private UUID destinationAccountId;
 
-    @Column(name = "category_id", nullable = false)
+    @Column(name = "category_id")
     private UUID categoryId;
 
     @CreationTimestamp

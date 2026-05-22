@@ -16,36 +16,37 @@ public class TransactionDTOS {
             TransactionType type,
             Long amount,
             String description,
-            UUID originalAccountId,
-            String originalAccountName,
+            UUID originAccountId,
+            String originAccountName,
             UUID destinationAccountId,
             String destinationAccountName,
             UUID categoryId,
-            String categoryName
+            String categoryName,
+            boolean resultedInNegativeBalance
     ) {}
 
     public record CreateGastoRequest(
             @NotNull Instant dateIssued,
             @NotNull Long amount,
             @NotBlank String description,
-            @NotNull UUID originAccount,
-            UUID categoryId
+            @NotNull UUID originAccountId,
+            @NotNull UUID categoryId
     ) {}
 
     public record CreateIngresoRequest(
             @NotNull Instant dateIssued,
             @NotNull Long amount,
             @NotBlank String description,
-            @NotNull UUID destinationAccount,
-            UUID categoryId
+            @NotNull UUID destinationAccountId,
+            @NotNull UUID categoryId
     ) {}
 
     public record CreateTransferenciaRequest(
             @NotNull Instant dateIssued,
             @NotNull Long amount,
             @NotBlank String description,
-            @NotNull UUID originAccount,
-            @NotNull UUID destinationAccount,
+            @NotNull UUID originAccountId,
+            @NotNull UUID destinationAccountId,
             UUID categoryId
     ) {}
 }
