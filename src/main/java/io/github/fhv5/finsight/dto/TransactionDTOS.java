@@ -49,4 +49,14 @@ public class TransactionDTOS {
             @NotNull UUID destinationAccountId,
             UUID categoryId
     ) {}
+
+    public record UpdateRequest(
+            Instant dateIssued,
+            TransactionDTOS type,
+            Long amount,
+            String description,
+            UUID originAccountId,
+            UUID destinationAccountId,
+            UUID categoryId
+    ) {}
 }
