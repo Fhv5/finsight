@@ -53,4 +53,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
         WHERE t.id = :id AND t.userId = :userId
     """)
     Optional<TransactionView> findByIdAndUserId(@Param("id") UUID id, @Param("userId") UUID userId);
+
+    Optional<Transaction> findEntityByIdAndUserId(UUID id, UUID userId);
 }
