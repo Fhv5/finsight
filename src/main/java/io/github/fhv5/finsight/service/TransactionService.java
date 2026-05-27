@@ -182,4 +182,25 @@ public class TransactionService {
                 .resultedInNegativeBalance(originAccount.getBalance() < 0)
                 .build();
     }
+
+    @Transactional
+    public TransactionDTOS.Response updateTransaction(
+            UUID userId,
+            UUID transactionId,
+            TransactionDTOS.UpdateRequest request) {
+
+        Transaction transaction = transactionRepository.findEntityByIdAndUserId(transactionId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found or does not belong to user"));
+
+        if (request.dateIssued() != null) {
+            transaction.setDateIssued(request.dateIssued());
+        }
+
+        if (request.description() != null) {
+            transaction.setDescription(request.description());
+        }
+
+
+
+    }
 }
