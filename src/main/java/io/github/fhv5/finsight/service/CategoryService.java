@@ -92,7 +92,7 @@ public class CategoryService {
         }
 
         if (request.type() != null && request.type() != existingCategory.getType()) {
-            if (transactionRepository.findByCategoryId(categoryId)) {
+            if (transactionRepository.existsByCategoryId(categoryId)) {
                 throw new ExistingTransactionsException("This category has transactions associated to it.");
             }
             existingCategory.setType(request.type());
@@ -111,7 +111,7 @@ public class CategoryService {
         Category existingCategory = categoryRepository.findByIdAndUserId(categoryId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found or does not belong to user"));
 
-        if (transactionRepository.findByCategoryId(categoryId)) {
+        if (transactionRepository.existsByCategoryId(categoryId)) {
             throw new ExistingTransactionsException("This category has transactions associated to it");
         }
 
