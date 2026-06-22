@@ -97,7 +97,7 @@ class CategoryControllerTest {
 
     @Test
     void updateCategory_ShouldReturnOkStatusAndUpdatedCategory() {
-        CategoryDTOS.UpdateRequest request = new CategoryDTOS.UpdateRequest("Food");
+        CategoryDTOS.UpdateRequest request = new CategoryDTOS.UpdateRequest("Food", null);
         CategoryDTOS.Response expectedResponse = CategoryDTOS.Response.builder()
                 .id(categoryId)
                 .name("Food")
