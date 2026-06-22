@@ -1,5 +1,7 @@
 package io.github.fhv5.finsight.dto;
 
+import io.github.fhv5.finsight.model.Account;
+import io.github.fhv5.finsight.model.Category;
 import io.github.fhv5.finsight.model.TransactionType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -52,11 +54,18 @@ public class TransactionDTOS {
 
     public record UpdateRequest(
             Instant dateIssued,
-            TransactionDTOS type,
+            TransactionType type,
             Long amount,
             String description,
             UUID originAccountId,
             UUID destinationAccountId,
             UUID categoryId
+    ) {}
+
+    @Builder
+    public record TransactionContext(
+            Account origin,
+            Account destination,
+            Category category
     ) {}
 }
