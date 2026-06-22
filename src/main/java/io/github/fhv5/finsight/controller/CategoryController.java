@@ -6,6 +6,7 @@ import io.github.fhv5.finsight.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -82,7 +83,7 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity<CategoryDTOS.Response> createCategory(
             @AuthenticationPrincipal SecurityUser securityUser,
-            @RequestBody CategoryDTOS.CreateRequest request) {
+            @Valid @RequestBody CategoryDTOS.CreateRequest request) {
 
         return new ResponseEntity<>(
                 categoryService.createCategory(securityUser.getId(), request),
@@ -108,7 +109,7 @@ public class CategoryController {
     public ResponseEntity<CategoryDTOS.Response> updateCategory(
             @AuthenticationPrincipal SecurityUser securityUser,
             @PathVariable UUID categoryId,
-            @RequestBody CategoryDTOS.UpdateRequest request
+            @Valid @RequestBody CategoryDTOS.UpdateRequest request
             ) {
 
         return new ResponseEntity<>(

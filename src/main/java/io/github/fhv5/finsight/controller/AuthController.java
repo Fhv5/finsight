@@ -5,6 +5,7 @@ import io.github.fhv5.finsight.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,7 @@ public class AuthController {
             }
     )
     @PostMapping("/signup")
-    public ResponseEntity<AuthDTOS.LoginResponse> register(@RequestBody AuthDTOS.RegisterRequest request) {
+    public ResponseEntity<AuthDTOS.LoginResponse> register(@Valid @RequestBody AuthDTOS.RegisterRequest request) {
         return new ResponseEntity<>(authService.register(request), HttpStatus.CREATED);
     }
 
@@ -69,7 +70,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthDTOS.LoginResponse> refreshToken(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader,
-            @RequestBody AuthDTOS.RefreshRequest request) {
+            @Valid @RequestBody AuthDTOS.RefreshRequest request) {
         return new ResponseEntity<>(authService.rotateTokens(authHeader, request.refreshToken()), HttpStatus.OK);
     }
 }

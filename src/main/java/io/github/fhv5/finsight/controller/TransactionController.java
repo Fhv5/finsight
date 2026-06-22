@@ -3,6 +3,7 @@ package io.github.fhv5.finsight.controller;
 import io.github.fhv5.finsight.dto.TransactionDTOS;
 import io.github.fhv5.finsight.security.SecurityUser;
 import io.github.fhv5.finsight.service.TransactionService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class TransactionController {
     @PostMapping("/ingreso")
     public ResponseEntity<TransactionDTOS.Response> createIngreso(
             @AuthenticationPrincipal SecurityUser securityUser,
-            @RequestBody TransactionDTOS.CreateIngresoRequest request) {
+            @Valid @RequestBody TransactionDTOS.CreateIngresoRequest request) {
         return new ResponseEntity<>(
                 transactionService.createIngreso(securityUser.getId(), request),
                 HttpStatus.CREATED);
@@ -47,7 +48,7 @@ public class TransactionController {
     @PostMapping("/gasto")
     public ResponseEntity<TransactionDTOS.Response> createGasto(
             @AuthenticationPrincipal SecurityUser securityUser,
-            @RequestBody TransactionDTOS.CreateGastoRequest request) {
+            @Valid @RequestBody TransactionDTOS.CreateGastoRequest request) {
         return new ResponseEntity<>(
                 transactionService.createGasto(securityUser.getId(), request),
                 HttpStatus.CREATED);
@@ -56,7 +57,7 @@ public class TransactionController {
     @PostMapping("/transferencia")
     public ResponseEntity<TransactionDTOS.Response> createTransferencia(
             @AuthenticationPrincipal SecurityUser securityUser,
-            @RequestBody TransactionDTOS.CreateTransferenciaRequest request) {
+            @Valid @RequestBody TransactionDTOS.CreateTransferenciaRequest request) {
         return new ResponseEntity<>(
                 transactionService.createTransferencia(securityUser.getId(), request),
                 HttpStatus.CREATED);
