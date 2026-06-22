@@ -1,6 +1,5 @@
 package io.github.fhv5.finsight.service;
 
-import io.github.fhv5.finsight.dto.AccountDTOS;
 import io.github.fhv5.finsight.dto.TransactionDTOS;
 import io.github.fhv5.finsight.exception.InvalidInputException;
 import io.github.fhv5.finsight.exception.ResourceNotFoundException;
@@ -10,10 +9,10 @@ import io.github.fhv5.finsight.repository.AccountRepository;
 import io.github.fhv5.finsight.repository.CategoryRepository;
 import io.github.fhv5.finsight.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -164,14 +163,8 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findEntityByIdAndUserId(transactionId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found or does not belong to user"));
 
-        // PASO 1
-        switch (transaction.getType()) {
-            case INGRESO -> revertIngreso(transaction, userId);
-            case GASTO -> revertGasto(transaction, userId);
-            case TRANSFERENCIA -> revertTransferencia(transaction, userId);
-        }
+        revertTransaction(transaction, userId);
 
-        // PASO 2
         if (request.dateIssued() != null) transaction.setDateIssued(request.dateIssued());
         if (request.description() != null) transaction.setDescription(request.description());
         if (request.type() != null) transaction.setType(request.type());
@@ -180,19 +173,12 @@ public class TransactionService {
         if (request.destinationAccountId() != null) transaction.setDestinationAccountId(request.destinationAccountId());
         if (request.categoryId() != null) transaction.setCategoryId(request.categoryId());
 
-        // PASO 3
         TransactionDTOS.TransactionContext context = null;
 
         switch (transaction.getType()) {
-            case INGRESO -> {
-                context = applyIngreso(transaction, userId);
-            }
-            case GASTO -> {
-                context = applyGasto(transaction, userId);
-            }
-            case TRANSFERENCIA -> {
-                context = applyTransferencia(transaction, userId);
-            }
+            case INGRESO -> context = applyIngreso(transaction, userId);
+            case GASTO -> context = applyGasto(transaction, userId);
+            case TRANSFERENCIA -> context = applyTransferencia(transaction, userId);
         }
 
         Transaction savedTransaction = transactionRepository.save(transaction);
@@ -212,7 +198,27 @@ public class TransactionService {
                 .build();
     }
 
-    private void revertIngreso (Transaction transactionIngreso, UUID userId){
+    @Transactional
+    public void deleteTransaction(
+            UUID userId,
+            UUID transactionId
+    ) {
+        Transaction transaction = transactionRepository.findEntityByIdAndUserId(transactionId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found or does not belong to user"));
+
+        revertTransaction(transaction, userId);
+        transactionRepository.delete(transaction);
+    }
+
+    private void revertTransaction(@NonNull Transaction transaction, UUID userId) {
+        switch (transaction.getType()) {
+            case INGRESO -> revertIngreso(transaction, userId);
+            case GASTO -> revertGasto(transaction, userId);
+            case TRANSFERENCIA -> revertTransferencia(transaction, userId);
+        }
+    }
+
+    private void revertIngreso (@NonNull Transaction transactionIngreso, UUID userId){
         Account destinationAccount = accountRepository.findByIdAndUserId(transactionIngreso.getDestinationAccountId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account doesn't exist or does not belong to user"));
 
@@ -220,7 +226,7 @@ public class TransactionService {
         accountRepository.save(destinationAccount);
     }
 
-    private void revertGasto (Transaction transactionGasto, UUID userId){
+    private void revertGasto (@NonNull Transaction transactionGasto, UUID userId){
         Account originAccount = accountRepository.findByIdAndUserId(transactionGasto.getOriginAccountId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account doesn't exist or does not belong to user"));
 
@@ -228,7 +234,7 @@ public class TransactionService {
         accountRepository.save(originAccount);
     }
 
-    private void revertTransferencia (Transaction transactionTransferencia, UUID userId){
+    private void revertTransferencia (@NonNull Transaction transactionTransferencia, UUID userId){
         Account originAccount = accountRepository.findByIdAndUserId(transactionTransferencia.getOriginAccountId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account doesn't exist or does not belong to user"));
 
@@ -242,9 +248,9 @@ public class TransactionService {
         accountRepository.save(destinationAccount);
     }
 
-    private TransactionDTOS.TransactionContext applyIngreso (Transaction transactionIngreso, UUID userId) {
+    private TransactionDTOS.TransactionContext applyIngreso (@NonNull Transaction transactionIngreso, UUID userId) {
         if (transactionIngreso.getOriginAccountId() != null || transactionIngreso.getDestinationAccountId() == null) {
-            throw new IllegalArgumentException("Change this to custom exception later");
+            throw new InvalidInputException("Destination Account ID is Null or payload includes Origin Account ID");
         }
         Category category = categoryRepository.findByIdAndUserIdAndType(
                         transactionIngreso.getCategoryId(), userId, CategoryType.INGRESO)
@@ -261,9 +267,9 @@ public class TransactionService {
                 .build();
     }
 
-    private TransactionDTOS.TransactionContext applyGasto (Transaction transactionGasto, UUID userId) {
+    private TransactionDTOS.TransactionContext applyGasto (@NonNull Transaction transactionGasto, UUID userId) {
         if (transactionGasto.getOriginAccountId() == null || transactionGasto.getDestinationAccountId() != null) {
-            throw new IllegalArgumentException("Change this to custom exception later");
+            throw new InvalidInputException("Origin Account ID is Null or payload includes Destination Account ID");
         }
         Category category = categoryRepository.findByIdAndUserIdAndType(
                         transactionGasto.getCategoryId(), userId, CategoryType.GASTO)
@@ -280,9 +286,9 @@ public class TransactionService {
                 .build();
     }
 
-    private TransactionDTOS.TransactionContext applyTransferencia (Transaction transactionTransferencia, UUID userId) {
+    private TransactionDTOS.TransactionContext applyTransferencia (@NonNull Transaction transactionTransferencia, UUID userId) {
         if (transactionTransferencia.getOriginAccountId() == null || transactionTransferencia.getDestinationAccountId() == null) {
-            throw new IllegalArgumentException("Change this to custom exception later");
+            throw new IllegalArgumentException("Origin Account ID or Destionation Account ID are Null");
         }
         Account originAccount = accountRepository.findByIdAndUserId(transactionTransferencia.getOriginAccountId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account doesn't exist or does not belong to user"));
