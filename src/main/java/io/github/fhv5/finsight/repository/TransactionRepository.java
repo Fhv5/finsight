@@ -55,4 +55,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     Optional<TransactionView> findByIdAndUserId(@Param("id") UUID id, @Param("userId") UUID userId);
 
     Optional<Transaction> findEntityByIdAndUserId(UUID id, UUID userId);
+
+    boolean findByCategoryId(UUID categoryId);
 }
