@@ -1,11 +1,13 @@
 package io.github.fhv5.finsight.service;
 
 import io.github.fhv5.finsight.dto.CategoryDTOS;
+import io.github.fhv5.finsight.exception.ExistingTransactionsException;
 import io.github.fhv5.finsight.exception.InvalidInputException;
 import io.github.fhv5.finsight.exception.ResourceAlreadyExistsException;
 import io.github.fhv5.finsight.exception.ResourceNotFoundException;
 import io.github.fhv5.finsight.model.Category;
 import io.github.fhv5.finsight.repository.CategoryRepository;
+import io.github.fhv5.finsight.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CategoryService {
     private final CategoryRepository categoryRepository;
+    private final TransactionRepository transactionRepository;
 
     public List<CategoryDTOS.Response> getCategoriesForCurrentUser(
             UUID userId
@@ -85,8 +88,14 @@ public class CategoryService {
             if (categoryRepository.existsByUserIdAndNameAndType(userId, request.name(), existingCategory.getType())) {
                 throw new ResourceAlreadyExistsException("This user already has a category with the same name and type");
             }
-
             existingCategory.setName(request.name());
+        }
+
+        if (request.type() != null && request.type() != existingCategory.getType()) {
+            if (transactionRepository.findByCategoryId(categoryId)) {
+                throw new ExistingTransactionsException("This category has transactions associated to it.");
+            }
+            existingCategory.setType(request.type());
         }
 
         Category savedCategory = categoryRepository.save(existingCategory);
@@ -101,6 +110,10 @@ public class CategoryService {
     public void deleteCategory(UUID categoryId, UUID userId) {
         Category existingCategory = categoryRepository.findByIdAndUserId(categoryId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found or does not belong to user"));
+
+        if (transactionRepository.findByCategoryId(categoryId)) {
+            throw new ExistingTransactionsException("This category has transactions associated to it");
+        }
 
         categoryRepository.delete(existingCategory);
     }

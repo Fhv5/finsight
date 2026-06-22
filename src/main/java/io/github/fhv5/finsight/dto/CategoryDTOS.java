@@ -21,6 +21,7 @@ public class CategoryDTOS {
     ) {}
 
     public record UpdateRequest(
-        @NotEmpty String name
+        @NotEmpty String name,
+        CategoryType type
     ) {}
 }
