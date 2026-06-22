@@ -61,4 +61,22 @@ public class TransactionController {
                 transactionService.createTransferencia(securityUser.getId(), request),
                 HttpStatus.CREATED);
     }
+
+    @PatchMapping("/{transactionId}")
+    public ResponseEntity<TransactionDTOS.Response> updateTransaction(
+            @AuthenticationPrincipal SecurityUser securityUser,
+            @RequestBody TransactionDTOS.UpdateRequest request,
+            @PathVariable UUID transactionId) {
+        return new ResponseEntity<>(
+                transactionService.updateTransaction(securityUser.getId(), transactionId, request),
+                HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{transactionId}")
+    public ResponseEntity<Void> deleteTransaction(
+            @AuthenticationPrincipal SecurityUser securityUser,
+            @PathVariable UUID transactionId) {
+        transactionService.deleteTransaction(securityUser.getId(), transactionId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
