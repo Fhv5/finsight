@@ -1,0 +1,16 @@
+package io.github.fhv5.finsight.repository;
+
+import io.github.fhv5.finsight.model.Budget;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface BudgetRepository extends JpaRepository<Budget, UUID> {
+    List<Budget> findAllByUserId(UUID userId);
+
+    Optional<Budget> findByIdAndUserId(UUID id, UUID userId);
+
+    boolean existsByCategoryIdAndUserId(UUID categoryId, UUID userId);
+}

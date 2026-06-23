@@ -1,0 +1,50 @@
+package io.github.fhv5.finsight.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
+
+@Entity
+@Builder
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "budgets")
+public class Budget {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(name = "limit_amount", nullable = false)
+    private Long limitAmount;
+
+    @Column(name = "category_id")
+    private UUID categoryId;
+
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
+
+    @CreationTimestamp
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    private Instant updatedAt;
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Budget budget)) return false;
+        return Objects.equals(getId(), budget.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
+    }
+}
