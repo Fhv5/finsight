@@ -1,7 +1,6 @@
 package io.github.fhv5.finsight.service;
 
 import io.github.fhv5.finsight.dto.TransactionDTOS;
-import io.github.fhv5.finsight.exception.InvalidInputException;
 import io.github.fhv5.finsight.exception.ResourceNotFoundException;
 import io.github.fhv5.finsight.model.*;
 import io.github.fhv5.finsight.projection.TransactionView;
