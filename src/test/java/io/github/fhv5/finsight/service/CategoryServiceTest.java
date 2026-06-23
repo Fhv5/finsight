@@ -1,12 +1,14 @@
 package io.github.fhv5.finsight.service;
 
 import io.github.fhv5.finsight.dto.CategoryDTOS;
+import io.github.fhv5.finsight.exception.ExistingBudgetException;
 import io.github.fhv5.finsight.exception.ExistingTransactionsException;
 import io.github.fhv5.finsight.exception.InvalidInputException;
 import io.github.fhv5.finsight.exception.ResourceAlreadyExistsException;
 import io.github.fhv5.finsight.exception.ResourceNotFoundException;
 import io.github.fhv5.finsight.model.Category;
 import io.github.fhv5.finsight.model.CategoryType;
+import io.github.fhv5.finsight.repository.BudgetRepository;
 import io.github.fhv5.finsight.repository.CategoryRepository;
 import io.github.fhv5.finsight.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +34,9 @@ class CategoryServiceTest {
 
     @Mock
     private TransactionRepository transactionRepository;
+
+    @Mock
+    private BudgetRepository budgetRepository;
 
     @InjectMocks
     private CategoryService categoryService;
@@ -170,7 +175,7 @@ class CategoryServiceTest {
         CategoryDTOS.UpdateRequest request = new CategoryDTOS.UpdateRequest(null, CategoryType.INGRESO);
 
         when(categoryRepository.findByIdAndUserId(categoryId, userId)).thenReturn(Optional.of(mockCategory));
-        when(transactionRepository.existsByCategoryId(categoryId)).thenReturn(true);
+        when(transactionRepository.existsByCategoryIdAndUserId(categoryId, userId)).thenReturn(true);
 
         assertThrows(ExistingTransactionsException.class, () -> categoryService.updateCategory(categoryId, userId, request));
         verify(categoryRepository, never()).save(any(Category.class));
@@ -181,7 +186,7 @@ class CategoryServiceTest {
         CategoryDTOS.UpdateRequest request = new CategoryDTOS.UpdateRequest(null, CategoryType.INGRESO);
 
         when(categoryRepository.findByIdAndUserId(categoryId, userId)).thenReturn(Optional.of(mockCategory));
-        when(transactionRepository.existsByCategoryId(categoryId)).thenReturn(false);
+        when(transactionRepository.existsByCategoryIdAndUserId(categoryId, userId)).thenReturn(false);
         when(categoryRepository.save(any(Category.class))).thenReturn(mockCategory);
 
         CategoryDTOS.Response response = categoryService.updateCategory(categoryId, userId, request);
@@ -194,7 +199,8 @@ class CategoryServiceTest {
     @Test
     void deleteCategory_ShouldDelete_WhenValid() {
         when(categoryRepository.findByIdAndUserId(categoryId, userId)).thenReturn(Optional.of(mockCategory));
-        when(transactionRepository.existsByCategoryId(categoryId)).thenReturn(false);
+        when(transactionRepository.existsByCategoryIdAndUserId(categoryId, userId)).thenReturn(false);
+        when(budgetRepository.existsByCategoryIdAndUserId(categoryId, userId)).thenReturn(false);
 
         categoryService.deleteCategory(categoryId, userId);
 
@@ -212,9 +218,19 @@ class CategoryServiceTest {
     @Test
     void deleteCategory_ShouldThrowException_WhenTransactionsExist() {
         when(categoryRepository.findByIdAndUserId(categoryId, userId)).thenReturn(Optional.of(mockCategory));
-        when(transactionRepository.existsByCategoryId(categoryId)).thenReturn(true);
+        when(transactionRepository.existsByCategoryIdAndUserId(categoryId, userId)).thenReturn(true);
 
         assertThrows(ExistingTransactionsException.class, () -> categoryService.deleteCategory(categoryId, userId));
+        verify(categoryRepository, never()).delete(any(Category.class));
+    }
+
+    @Test
+    void deleteCategory_ShouldThrowException_WhenActiveBudgetExists() {
+        when(categoryRepository.findByIdAndUserId(categoryId, userId)).thenReturn(Optional.of(mockCategory));
+        when(transactionRepository.existsByCategoryIdAndUserId(categoryId, userId)).thenReturn(false);
+        when(budgetRepository.existsByCategoryIdAndUserId(categoryId, userId)).thenReturn(true);
+
+        assertThrows(ExistingBudgetException.class, () -> categoryService.deleteCategory(categoryId, userId));
         verify(categoryRepository, never()).delete(any(Category.class));
     }
 }

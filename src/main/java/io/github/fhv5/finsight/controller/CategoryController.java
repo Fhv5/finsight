@@ -123,7 +123,7 @@ public class CategoryController {
     @Operation(
             summary = "Delete a category",
             description = "Deletes a specific category by its ID for the currently authenticated user. " +
-                    "Deletion is rejected if the category has transactions associated to it.",
+                    "Deletion is rejected if the category has existing transactions or an active budget.",
             operationId = "deleteCategory"
     )
     @ApiResponses(
@@ -131,7 +131,7 @@ public class CategoryController {
                     @ApiResponse(responseCode = "204", description = "Category deleted successfully"),
                     @ApiResponse(responseCode = "401", description = "Authentication failed"),
                     @ApiResponse(responseCode = "404", description = "Category not found or does not belong to user"),
-                    @ApiResponse(responseCode = "422", description = "Cannot delete: category has existing transactions")
+                    @ApiResponse(responseCode = "422", description = "Cannot delete: category has existing transactions or an active budget")
             }
     )
     @DeleteMapping("/{categoryId}")

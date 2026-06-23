@@ -1,11 +1,9 @@
 package io.github.fhv5.finsight.service;
 
 import io.github.fhv5.finsight.dto.CategoryDTOS;
-import io.github.fhv5.finsight.exception.ExistingTransactionsException;
-import io.github.fhv5.finsight.exception.InvalidInputException;
-import io.github.fhv5.finsight.exception.ResourceAlreadyExistsException;
-import io.github.fhv5.finsight.exception.ResourceNotFoundException;
+import io.github.fhv5.finsight.exception.*;
 import io.github.fhv5.finsight.model.Category;
+import io.github.fhv5.finsight.repository.BudgetRepository;
 import io.github.fhv5.finsight.repository.CategoryRepository;
 import io.github.fhv5.finsight.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
@@ -19,6 +17,7 @@ import java.util.UUID;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final TransactionRepository transactionRepository;
+    private final BudgetRepository budgetRepository;
 
     public List<CategoryDTOS.Response> getCategoriesForCurrentUser(
             UUID userId
@@ -92,7 +91,7 @@ public class CategoryService {
         }
 
         if (request.type() != null && request.type() != existingCategory.getType()) {
-            if (transactionRepository.existsByCategoryId(categoryId)) {
+            if (transactionRepository.existsByCategoryIdAndUserId(categoryId, userId)) {
                 throw new ExistingTransactionsException("This category has transactions associated to it.");
             }
             existingCategory.setType(request.type());
@@ -111,8 +110,12 @@ public class CategoryService {
         Category existingCategory = categoryRepository.findByIdAndUserId(categoryId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found or does not belong to user"));
 
-        if (transactionRepository.existsByCategoryId(categoryId)) {
+        if (transactionRepository.existsByCategoryIdAndUserId(categoryId, userId)) {
             throw new ExistingTransactionsException("This category has transactions associated to it");
+        }
+
+        if (budgetRepository.existsByCategoryIdAndUserId(categoryId, userId)) {
+            throw new ExistingBudgetException("This category has a budget associated to it");
         }
 
         categoryRepository.delete(existingCategory);

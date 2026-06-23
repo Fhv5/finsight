@@ -288,7 +288,7 @@ public class TransactionService {
 
     private TransactionDTOS.TransactionContext applyTransferencia (@NonNull Transaction transactionTransferencia, UUID userId) {
         if (transactionTransferencia.getOriginAccountId() == null || transactionTransferencia.getDestinationAccountId() == null) {
-            throw new InvalidInputException("Origin Account ID or Destionation Account ID are Null");
+            throw new InvalidInputException("Origin Account ID or Destination Account ID are Null");
         }
         Account originAccount = accountRepository.findByIdAndUserId(transactionTransferencia.getOriginAccountId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account doesn't exist or does not belong to user"));
