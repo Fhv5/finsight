@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.zone.ZoneRulesException;
 import java.util.List;
 
 @RestControllerAdvice
@@ -76,6 +77,21 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.NOT_FOUND;
 
         return buildErrorResponse(status, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ZoneRulesException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidTimezone(ZoneRulesException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Invalid timezone identifier", request);
+    }
+
+    @ExceptionHandler(ExistingTransactionsException.class)
+    public ResponseEntity<ErrorResponseDTO> handleExistingTransactionsException(ExistingTransactionsException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ExistingBudgetException.class)
+    public ResponseEntity<ErrorResponseDTO> handleExistingBudgetException(ExistingBudgetException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage(), request);
     }
 
     private ResponseEntity<ErrorResponseDTO> buildErrorResponse(HttpStatus status, String message, HttpServletRequest request) {

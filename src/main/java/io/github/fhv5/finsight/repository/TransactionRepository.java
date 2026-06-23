@@ -1,5 +1,6 @@
 package io.github.fhv5.finsight.repository;
 
+import io.github.fhv5.finsight.model.CategoryType;
 import io.github.fhv5.finsight.model.Transaction;
 import io.github.fhv5.finsight.projection.TransactionView;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -57,4 +59,22 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     Optional<Transaction> findEntityByIdAndUserId(UUID id, UUID userId);
 
     boolean existsByCategoryId(UUID categoryId);
+
+    @Query("""
+       SELECT COALESCE(SUM(t.amount), 0)
+       FROM Transaction t
+       WHERE t.categoryId = :categoryId 
+              AND t.userId = :userId
+              AND t.dateIssued >= :start
+              AND t.dateIssued < :end
+              AND t.type = io.github.fhv5.finsight.model.TransactionType.GASTO
+       """)
+    Long computeMonthlyExpenseByCategoryId(
+            UUID categoryId,
+            UUID userId,
+            Instant start,
+            Instant end
+    );
+
+    boolean existsByCategoryIdAndUserId(UUID categoryId, UUID userId);
 }
