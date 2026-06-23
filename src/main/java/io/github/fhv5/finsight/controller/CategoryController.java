@@ -93,7 +93,8 @@ public class CategoryController {
 
     @Operation(
             summary = "Update a category",
-            description = "Updates the name of an existing category for the currently authenticated user.",
+            description = "Updates the name and/or type of an existing category for the currently authenticated user. " +
+                    "A type change is rejected if the category has transactions associated to it.",
             operationId = "updateCategory"
     )
     @ApiResponses(
@@ -102,7 +103,8 @@ public class CategoryController {
                     @ApiResponse(responseCode = "400", description = "Invalid input data"),
                     @ApiResponse(responseCode = "401", description = "Authentication failed"),
                     @ApiResponse(responseCode = "404", description = "Category not found or does not belong to user"),
-                    @ApiResponse(responseCode = "409", description = "This user already has a category with the same name and type")
+                    @ApiResponse(responseCode = "409", description = "This user already has a category with the same name and type"),
+                    @ApiResponse(responseCode = "422", description = "Cannot change type: category has existing transactions")
             }
     )
     @PatchMapping("/{categoryId}")
@@ -120,14 +122,16 @@ public class CategoryController {
 
     @Operation(
             summary = "Delete a category",
-            description = "Deletes a specific category by its ID for the currently authenticated user.",
+            description = "Deletes a specific category by its ID for the currently authenticated user. " +
+                    "Deletion is rejected if the category has transactions associated to it.",
             operationId = "deleteCategory"
     )
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "204", description = "Category deleted successfully"),
                     @ApiResponse(responseCode = "401", description = "Authentication failed"),
-                    @ApiResponse(responseCode = "404", description = "Category not found or does not belong to user")
+                    @ApiResponse(responseCode = "404", description = "Category not found or does not belong to user"),
+                    @ApiResponse(responseCode = "422", description = "Cannot delete: category has existing transactions")
             }
     )
     @DeleteMapping("/{categoryId}")
