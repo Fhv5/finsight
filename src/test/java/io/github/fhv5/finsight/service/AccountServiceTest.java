@@ -1,9 +1,11 @@
 package io.github.fhv5.finsight.service;
 
 import io.github.fhv5.finsight.dto.AccountDTOS;
+import io.github.fhv5.finsight.exception.InvalidInputException;
 import io.github.fhv5.finsight.exception.ResourceAlreadyExistsException;
 import io.github.fhv5.finsight.exception.ResourceNotFoundException;
 import io.github.fhv5.finsight.model.Account;
+import io.github.fhv5.finsight.model.AccountType;
 import io.github.fhv5.finsight.repository.AccountRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +44,7 @@ class AccountServiceTest {
                 .name("Main Account")
                 .description("Primary checking account")
                 .balance(1000L)
+                .type(AccountType.REGULAR)
                 .userId(userId)
                 .build();
     }
@@ -140,5 +143,77 @@ class AccountServiceTest {
         accountService.deleteAccount(accountId, userId);
 
         verify(accountRepository).delete(mockAccount);
+    }
+
+    // ─── createSavingsAccount ──────────────────────────────────────────────────
+
+    @Test
+    void createSavingsAccount_ShouldSaveAndReturnSavingsAccount_WhenValid() {
+        AccountDTOS.CreateSavingsRequest request =
+                new AccountDTOS.CreateSavingsRequest("Emergency Fund", "For emergencies", 10000L);
+
+        when(accountRepository.existsByUserIdAndName(userId, "Emergency Fund")).thenReturn(false);
+        when(accountRepository.save(any(Account.class))).thenAnswer(invocation -> {
+            Account account = invocation.getArgument(0);
+            account.setId(UUID.randomUUID());
+            return account;
+        });
+
+        AccountDTOS.Response response = accountService.createSavingsAccount(request, userId);
+
+        assertNotNull(response);
+        assertEquals("Emergency Fund", response.name());
+        assertEquals(0L, response.balance());
+        assertEquals(10000L, response.targetAmount());
+        assertEquals(AccountType.AHORRO, response.type());
+        verify(accountRepository).save(any(Account.class));
+    }
+
+    @Test
+    void createSavingsAccount_ShouldThrowException_WhenNameAlreadyExists() {
+        AccountDTOS.CreateSavingsRequest request =
+                new AccountDTOS.CreateSavingsRequest("Main Account", "Desc", 5000L);
+
+        when(accountRepository.existsByUserIdAndName(userId, "Main Account")).thenReturn(true);
+
+        assertThrows(ResourceAlreadyExistsException.class,
+                () -> accountService.createSavingsAccount(request, userId));
+        verify(accountRepository, never()).save(any(Account.class));
+    }
+
+    // ─── deleteAccount savings guard ───────────────────────────────────────────
+
+    @Test
+    void deleteAccount_ShouldThrowException_WhenSavingsAccountHasPositiveBalance() {
+        Account savingsAccount = Account.builder()
+                .id(accountId)
+                .name("Emergency Fund")
+                .description("For emergencies")
+                .balance(500L)
+                .type(AccountType.AHORRO)
+                .userId(userId)
+                .build();
+        when(accountRepository.findByIdAndUserId(accountId, userId)).thenReturn(Optional.of(savingsAccount));
+
+        assertThrows(InvalidInputException.class,
+                () -> accountService.deleteAccount(accountId, userId));
+        verify(accountRepository, never()).delete(any(Account.class));
+    }
+
+    @Test
+    void deleteAccount_ShouldDelete_WhenSavingsAccountBalanceIsZero() {
+        Account savingsAccount = Account.builder()
+                .id(accountId)
+                .name("Empty Savings")
+                .description("Empty")
+                .balance(0L)
+                .type(AccountType.AHORRO)
+                .userId(userId)
+                .build();
+        when(accountRepository.findByIdAndUserId(accountId, userId)).thenReturn(Optional.of(savingsAccount));
+
+        accountService.deleteAccount(accountId, userId);
+
+        verify(accountRepository).delete(savingsAccount);
     }
 }

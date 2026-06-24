@@ -89,6 +89,30 @@ public class AccountController {
     }
 
     @Operation(
+            summary = "Create a savings account",
+            description = "Creates a new savings account with a target amount goal. The initial balance is always zero. " +
+                    "Only transfers can add funds to a savings account.",
+            operationId = "createSavingsAccount"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "201", description = "Savings account created successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data"),
+                    @ApiResponse(responseCode = "401", description = "Authentication failed"),
+                    @ApiResponse(responseCode = "409", description = "Savings account name already exists for this user")
+            }
+    )
+    @PostMapping("/savings")
+    public ResponseEntity<AccountDTOS.Response> createSavingsAccount(
+            @Valid @RequestBody AccountDTOS.CreateSavingsRequest request,
+            @AuthenticationPrincipal SecurityUser securityUser) {
+        return new ResponseEntity<>(
+                accountService.createSavingsAccount(request, securityUser.getId()),
+                HttpStatus.CREATED
+        );
+    }
+
+    @Operation(
             summary = "Update an account",
             description = "Updates an existing account for the currently authenticated user.",
             operationId = "updateAccount"
@@ -121,6 +145,7 @@ public class AccountController {
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "204", description = "Account deleted successfully"),
+                    @ApiResponse(responseCode = "400", description = "Cannot delete a savings account with a positive balance"),
                     @ApiResponse(responseCode = "401", description = "Authentication failed"),
                     @ApiResponse(responseCode = "404", description = "Account not found or does not belong to user")
             }

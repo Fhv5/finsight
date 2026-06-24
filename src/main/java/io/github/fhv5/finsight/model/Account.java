@@ -31,6 +31,13 @@ public class Account {
     @Column(name = "balance", nullable = false)
     private Long balance;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private AccountType type;
+
+    @Column(name = "target_amount")
+    private Long targetAmount;
+
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 

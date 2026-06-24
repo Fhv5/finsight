@@ -141,7 +141,7 @@ class TransactionServiceTest {
 
         when(categoryRepository.findByIdAndUserIdAndType(categoryId, userId, CategoryType.INGRESO))
                 .thenReturn(Optional.of(mockIngresoCategory));
-        when(accountRepository.findByIdAndUserId(destinationAccountId, userId))
+        when(accountRepository.findByIdAndUserIdAndType(destinationAccountId, userId, AccountType.REGULAR))
                 .thenReturn(Optional.of(mockDestinationAccount));
         when(accountRepository.save(mockDestinationAccount)).thenReturn(mockDestinationAccount);
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> {
@@ -194,7 +194,7 @@ class TransactionServiceTest {
 
         when(categoryRepository.findByIdAndUserIdAndType(categoryId, userId, CategoryType.INGRESO))
                 .thenReturn(Optional.of(mockIngresoCategory));
-        when(accountRepository.findByIdAndUserId(destinationAccountId, userId))
+        when(accountRepository.findByIdAndUserIdAndType(destinationAccountId, userId, AccountType.REGULAR))
                 .thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
@@ -211,7 +211,7 @@ class TransactionServiceTest {
 
         when(categoryRepository.findByIdAndUserIdAndType(categoryId, userId, CategoryType.GASTO))
                 .thenReturn(Optional.of(mockGastoCategory));
-        when(accountRepository.findByIdAndUserId(originAccountId, userId))
+        when(accountRepository.findByIdAndUserIdAndType(originAccountId, userId, AccountType.REGULAR))
                 .thenReturn(Optional.of(mockOriginAccount));
         when(accountRepository.save(mockOriginAccount)).thenReturn(mockOriginAccount);
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> {
@@ -238,7 +238,7 @@ class TransactionServiceTest {
 
         when(categoryRepository.findByIdAndUserIdAndType(categoryId, userId, CategoryType.GASTO))
                 .thenReturn(Optional.of(mockGastoCategory));
-        when(accountRepository.findByIdAndUserId(originAccountId, userId))
+        when(accountRepository.findByIdAndUserIdAndType(originAccountId, userId, AccountType.REGULAR))
                 .thenReturn(Optional.of(mockOriginAccount));
         when(accountRepository.save(mockOriginAccount)).thenReturn(mockOriginAccount);
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> {
@@ -273,7 +273,7 @@ class TransactionServiceTest {
 
         when(categoryRepository.findByIdAndUserIdAndType(categoryId, userId, CategoryType.GASTO))
                 .thenReturn(Optional.of(mockGastoCategory));
-        when(accountRepository.findByIdAndUserId(originAccountId, userId))
+        when(accountRepository.findByIdAndUserIdAndType(originAccountId, userId, AccountType.REGULAR))
                 .thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
@@ -448,6 +448,8 @@ class TransactionServiceTest {
         // applyIngreso (after update)
         when(categoryRepository.findByIdAndUserIdAndType(categoryId, userId, CategoryType.INGRESO))
                 .thenReturn(Optional.of(mockIngresoCategory));
+        when(accountRepository.findByIdAndUserIdAndType(destinationAccountId, userId, AccountType.REGULAR))
+                .thenReturn(Optional.of(mockDestinationAccount));
         when(transactionRepository.save(any(Transaction.class))).thenReturn(existingTransaction);
 
         TransactionDTOS.Response result = transactionService.updateTransaction(userId, transactionId, request);
