@@ -257,8 +257,8 @@ public class TransactionService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Category doesn't exist, does not belong to user, or is not of type INGRESO"));
 
-        Account destinationAccount = accountRepository.findByIdAndUserId(transactionIngreso.getDestinationAccountId(), userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Account doesn't exist or does not belong to user"));
+        Account destinationAccount = accountRepository.findByIdAndUserIdAndType(transactionIngreso.getDestinationAccountId(), userId, AccountType.REGULAR)
+                .orElseThrow(() -> new ResourceNotFoundException("Account doesn't exist, does not belong to user, or is of type AHORRO"));
 
         destinationAccount.setBalance(destinationAccount.getBalance() + transactionIngreso.getAmount());
         return TransactionDTOS.TransactionContext.builder()
@@ -276,8 +276,8 @@ public class TransactionService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Category doesn't exist, does not belong to user, or is not of type GASTO"));
 
-        Account originAccount = accountRepository.findByIdAndUserId(transactionGasto.getOriginAccountId(), userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Account doesn't exist or does not belong to user"));
+        Account originAccount = accountRepository.findByIdAndUserIdAndType(transactionGasto.getOriginAccountId(), userId, AccountType.REGULAR)
+                .orElseThrow(() -> new ResourceNotFoundException("Account doesn't exist, does not belong to user, or is of type AHORRO"));
 
         originAccount.setBalance(originAccount.getBalance() - transactionGasto.getAmount());
         return TransactionDTOS.TransactionContext.builder()
@@ -290,11 +290,21 @@ public class TransactionService {
         if (transactionTransferencia.getOriginAccountId() == null || transactionTransferencia.getDestinationAccountId() == null) {
             throw new InvalidInputException("Origin Account ID or Destination Account ID are Null");
         }
+        if (transactionTransferencia.getOriginAccountId()
+                .equals(transactionTransferencia.getDestinationAccountId())) {
+            throw new InvalidInputException("Origin and destination accounts cannot be the same");
+        }
+
         Account originAccount = accountRepository.findByIdAndUserId(transactionTransferencia.getOriginAccountId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account doesn't exist or does not belong to user"));
 
         Account destinationAccount = accountRepository.findByIdAndUserId(transactionTransferencia.getDestinationAccountId(), userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account doesn't exist or does not belong to user"));
+
+        if (originAccount.getType() == AccountType.AHORRO &&
+                originAccount.getBalance() - transactionTransferencia.getAmount() < 0) {
+            throw new InvalidInputException("Savings account cannot have negative balance");
+        }
 
         originAccount.setBalance(originAccount.getBalance() - transactionTransferencia.getAmount());
         destinationAccount.setBalance(destinationAccount.getBalance() + transactionTransferencia.getAmount());

@@ -1,6 +1,7 @@
 package io.github.fhv5.finsight.controller;
 
 import io.github.fhv5.finsight.dto.AccountDTOS;
+import io.github.fhv5.finsight.model.AccountType;
 import io.github.fhv5.finsight.model.User;
 import io.github.fhv5.finsight.security.SecurityUser;
 import io.github.fhv5.finsight.service.AccountService;
@@ -85,6 +86,7 @@ class AccountControllerTest {
                 .name("Test Account")
                 .description("Desc")
                 .balance(100L)
+                .type(AccountType.REGULAR)
                 .build();
 
         when(accountService.createAccount(any(AccountDTOS.CreateRequest.class), eq(userId))).thenReturn(expectedResponse);
@@ -93,6 +95,29 @@ class AccountControllerTest {
 
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
         assertEquals(expectedResponse, result.getBody());
+    }
+
+    @Test
+    void createSavingsAccount_ShouldReturnCreatedStatusAndSavingsAccount() {
+        AccountDTOS.CreateSavingsRequest request =
+                new AccountDTOS.CreateSavingsRequest("Emergency Fund", "For emergencies", 10000L);
+        AccountDTOS.Response expectedResponse = AccountDTOS.Response.builder()
+                .id(accountId)
+                .name("Emergency Fund")
+                .description("For emergencies")
+                .balance(0L)
+                .targetAmount(10000L)
+                .type(AccountType.AHORRO)
+                .build();
+
+        when(accountService.createSavingsAccount(any(AccountDTOS.CreateSavingsRequest.class), eq(userId)))
+                .thenReturn(expectedResponse);
+
+        ResponseEntity<AccountDTOS.Response> result = accountController.createSavingsAccount(request, securityUser);
+
+        assertEquals(HttpStatus.CREATED, result.getStatusCode());
+        assertEquals(expectedResponse, result.getBody());
+        verify(accountService).createSavingsAccount(any(AccountDTOS.CreateSavingsRequest.class), eq(userId));
     }
 
     @Test
