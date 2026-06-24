@@ -34,13 +34,16 @@ El sistema ofrece los siguientes modulos y funcionalidades:
 - Consulta de acumulado mensual de gastos calculados en tiempo real segun la zona horaria del usuario.
 - Restricciones de integridad para evitar presupuestos duplicados por categoria.
 
+### Cuentas de ahorro
+- Definicion de cuentas de ahorro con una meta asociada.
+- Consulta del progreso de cuentas de ahorro.
+
 ### Seguridad y Autenticacion
 - Registro, inicio de sesion y refresco de tokens JWT.
 - Aislamiento de datos por usuario en todos los endpoints de la API.
 
 ## Por Implementar
 
-- Metas de ahorro
 - Reportes periodicos
 - Multiples monedas (Actualmente usa un Long generico)
 
