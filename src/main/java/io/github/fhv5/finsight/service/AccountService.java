@@ -5,6 +5,7 @@ import io.github.fhv5.finsight.exception.InvalidInputException;
 import io.github.fhv5.finsight.exception.ResourceAlreadyExistsException;
 import io.github.fhv5.finsight.exception.ResourceNotFoundException;
 import io.github.fhv5.finsight.model.Account;
+import io.github.fhv5.finsight.model.AccountType;
 import io.github.fhv5.finsight.repository.AccountRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,8 @@ public class AccountService {
                         .name(account.getName())
                         .description(account.getDescription())
                         .balance(account.getBalance())
+                        .targetAmount(account.getTargetAmount())
+                        .type(account.getType())
                         .build())
                 .toList();
     }
@@ -42,6 +45,8 @@ public class AccountService {
                 .name(account.getName())
                 .description(account.getDescription())
                 .balance(account.getBalance())
+                .targetAmount(account.getTargetAmount())
+                .type(account.getType())
                 .build();
     }
 
@@ -58,6 +63,7 @@ public class AccountService {
                 .description(request.description())
                 .balance(request.balance())
                 .userId(userId)
+                .type(AccountType.REGULAR)
                 .build();
 
         Account savedAccount = accountRepository.save(newAccount);
@@ -67,6 +73,38 @@ public class AccountService {
                 .name(savedAccount.getName())
                 .description(savedAccount.getDescription())
                 .balance(savedAccount.getBalance())
+                .type(AccountType.REGULAR)
+                .targetAmount(savedAccount.getTargetAmount())
+                .build();
+
+    }
+
+    public AccountDTOS.Response createSavingsAccount(
+            AccountDTOS.CreateSavingsRequest request,
+            UUID userId) {
+
+        if (accountRepository.existsByUserIdAndName(userId, request.name())) {
+            throw new ResourceAlreadyExistsException("Savings account name already exists for this user");
+        }
+
+        Account newAccount = Account.builder()
+                .name(request.name())
+                .description(request.description())
+                .balance(0L)
+                .targetAmount(request.targetAmount())
+                .userId(userId)
+                .type(AccountType.AHORRO)
+                .build();
+
+        Account savedAccount = accountRepository.save(newAccount);
+
+        return AccountDTOS.Response.builder()
+                .id(savedAccount.getId())
+                .name(savedAccount.getName())
+                .description(savedAccount.getDescription())
+                .balance(savedAccount.getBalance())
+                .type(AccountType.AHORRO)
+                .targetAmount(savedAccount.getTargetAmount())
                 .build();
 
     }
@@ -102,6 +140,8 @@ public class AccountService {
                 .name(updatedAccount.getName())
                 .description(updatedAccount.getDescription())
                 .balance(updatedAccount.getBalance())
+                .targetAmount(updatedAccount.getTargetAmount())
+                .type(updatedAccount.getType())
                 .build();
     }
 
@@ -110,6 +150,10 @@ public class AccountService {
             UUID userId) {
         Account existingAccount = accountRepository.findByIdAndUserId(accountId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found or does not belong to user"));
+
+        if (existingAccount.getType() == AccountType.AHORRO && existingAccount.getBalance() > 0) {
+            throw new InvalidInputException("Cannot delete a savings account with a positive balance");
+        }
 
         accountRepository.delete(existingAccount);
     }
