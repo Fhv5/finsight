@@ -3,6 +3,7 @@ package io.github.fhv5.finsight.dto;
 import io.github.fhv5.finsight.model.CategoryType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 import java.util.UUID;
@@ -26,7 +27,7 @@ public class CategoryDTOS {
        @Schema(description = "Category name", example = "Groceries", requiredMode = Schema.RequiredMode.REQUIRED)
        @NotEmpty String name,
        @Schema(description = "Category type", example = "GASTO", requiredMode = Schema.RequiredMode.REQUIRED)
-       @NotEmpty CategoryType type
+       @NotNull CategoryType type
     ) {}
 
     @Schema(description = "Request payload to update a category")
